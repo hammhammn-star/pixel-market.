@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixel Market</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#10131b;color:white;font-family:Arial,sans-serif;text-align:center;padding:18px}
+h1{color:#55d6be}
+p{color:#cbd5e1}
+#grid{display:grid;grid-template-columns:repeat(50,1fr);width:100%;max-width:600px;aspect-ratio:1;margin:20px auto;border:1px solid #64748b}
+.pixel{background:#252c3a;border:.2px solid #384254;padding:0;min-width:0;aspect-ratio:1;cursor:pointer}
+.pixel.selected{background:#55d6be}
+.pixel.sold{background:#e9a23b}
+button{background:#55d6be;border:0;border-radius:8px;padding:12px 18px;font-weight:bold}
+input{padding:12px;width:90%;max-width:400px;margin:6px;border-radius:7px;border:0}
+#info{margin:14px}
+</style>
+</head>
+<body>
+<h1>PIXEL MARKET</h1>
+<p>Beli tempat iklanmu sendiri!</p>
+<p>1 kotak = Rp1.000</p>
+<div id="info">Pixel dipilih: <b id="count">0</b></div>
+<div id="grid"></div>
+<h3 id="total">Total: Rp0</h3>
+<input id="brand" placeholder="Nama bisnis / merek">
+<input id="link" placeholder="Link website tujuan (https://...)">
+<br><br>
+<button onclick="order()">Pesan Pixel</button>
+<p id="message"></p>
+<script>
+const grid=document.getElementById('grid');
+const selected=new Set();
+for(let i=0;i<2500;i++){
+ const p=document.createElement('button');
+ p.className='pixel';
+ p.title='Pixel '+(i+1);
+ p.onclick=()=>{
+  if(p.classList.contains('sold'))return;
+  if(selected.has(i)){selected.delete(i);p.classList.remove('selected')}
+  else{selected.add(i);p.classList.add('selected')}
+  update();
+ };
+ grid.appendChild(p);
+}
+function update(){
+ document.getElementById('count').textContent=selected.size;
+ document.getElementById('total').textContent='Total: Rp'+(selected.size*1000).toLocaleString('id-ID');
+}
+function order(){
+ const brand=document.getElementById('brand').value.trim();
+ const link=document.getElementById('link').value.trim();
+ if(!selected.size)return alert('Pilih pixel dulu!');
+ if(!brand||!link)return alert('Isi nama bisnis dan link website!');
+ try{
+  const u=new URL(link);
+  if(!['http:','https:'].includes(u.protocol))throw 0;
+ }catch(e){return alert('Masukkan link website yang valid!')}
+ const data={brand,link,pixels:[...selected].map(i=>i+1),total:selected.size*1000};
+ const text='Halo admin, saya ingin pesan iklan Pixel Market:\n'+JSON.stringify(data,null,2);
+ document.getElementById('message').innerHTML=
+  'Pesanan dibuat. Hubungi admin untuk pembayaran manual.<br><button id="copy">Salin pesanan</button>';
+ document.getElementById('copy').onclick=async()=>{
+  try{await navigator.clipboard.writeText(text);alert('Pesanan disalin! Kirim ke admin.')}
+  catch(e){prompt('Salin pesanan ini:',text)}
+ };
+}
+</script>
+</body>
+</html>
